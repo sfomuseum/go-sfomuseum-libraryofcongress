@@ -1,0 +1,4 @@
+github.com/aaronland/go-roster v0.0.2 h1:2Fu7v4VQLRLRL/Zgr6R9S5JxsW75Ab/K88QtMVX532s=
+github.com/aaronland/go-roster v0.0.2/go.mod h1:AcovpxlG1XxJxX2Fjqlm63fEIBhCjEIBV4lP87FZDmI=
+github.com/sfomuseum/go-csvdict v0.0.1 h1:Cj8/qXXBJBxCjgorHW5QdRWEGCZpXc+qpdKH9CTRLGU=
+github.com/sfomuseum/go-csvdict v0.0.1/go.mod h1:KGO283kbQh+sqZq84XIj7qr0ImaGY2NX3hedUmAo/sI=

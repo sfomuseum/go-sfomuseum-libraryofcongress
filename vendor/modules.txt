@@ -1,0 +1,6 @@
+# github.com/aaronland/go-roster v0.0.2
+## explicit
+github.com/aaronland/go-roster
+# github.com/sfomuseum/go-csvdict v0.0.1
+## explicit
+github.com/sfomuseum/go-csvdict
