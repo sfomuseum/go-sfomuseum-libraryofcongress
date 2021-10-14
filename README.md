@@ -10,6 +10,20 @@ Documentation is incomplete at this time. For working example code have a look a
 * [lcsh/lookup_test.go](lcsh/lookup_test.go)
 * [lcnaf/lookup_test.go](lcnaf/lookup_test.go)
 
+## Tools
+
+### lookup
+
+For example:
+
+```
+$> ./bin/lookup -lookup-uri lcsh:// Airplanes
+sh85002782 Airplanes
+
+$> ./bin/lookup -lookup-uri lcnaf:// "Lindbergh, Charles A. (Charles Augustus), 1902-1974"
+n79100565 Lindbergh, Charles A. (Charles Augustus), 1902-1974
+```
+
 ## A note about "lookups"
 
 Please have a look at the [A note about "lookup" documentation](https://github.com/sfomuseum/go-sfomuseum-airfield#a-note-about-lookups) in the `go-sfomuseum-airfield` package. The issues outlined there are the same here. The "tl;dr" is:
