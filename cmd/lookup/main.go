@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "github.com/sfomuseum/go-sfomuseum-libraryofcongress/lcsh"
+	_ "github.com/sfomuseum/go-sfomuseum-libraryofcongress/lcnaf"	
 )
 
 import (
