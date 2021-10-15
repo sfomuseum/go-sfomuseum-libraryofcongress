@@ -10,7 +10,7 @@ import (
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/sqlite/tables"
 	"github.com/sfomuseum/go-csvdict"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/data"
-	_ "github.com/sfomuseum/go-sfomuseum-libraryofcongress/lcnaf"
+	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/lcnaf"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/lcsh"
 	"compress/bzip2"
 	"io"
@@ -54,7 +54,7 @@ func main() {
 
 	data_paths := map[string]string{
 		"lcsh":  lcsh.DATA_JSON,
-		// "lcnaf": lcnaf.DATA_JSON,
+		"lcnaf": lcnaf.DATA_JSON,
 	}
 	
 	for source, path := range data_paths {
