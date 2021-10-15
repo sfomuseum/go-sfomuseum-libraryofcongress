@@ -1,20 +1,20 @@
 package main
 
 import (
+	"compress/bzip2"
 	"context"
+	_ "database/sql"
 	"flag"
-	"log"
 	"fmt"
 	"github.com/aaronland/go-sqlite"
 	"github.com/aaronland/go-sqlite/database"
-	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/sqlite/tables"
 	"github.com/sfomuseum/go-csvdict"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/data"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/lcnaf"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/lcsh"
-	"compress/bzip2"
+	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/sqlite/tables"
 	"io"
-	_ "database/sql"
+	"log"
 )
 
 func main() {
@@ -24,13 +24,19 @@ func main() {
 	flag.Parse()
 
 	ctx := context.Background()
-	
+
 	sqlite_db, err := database.NewDB(ctx, *dsn)
 
 	if err != nil {
 		log.Fatalf("Failed to create new database, %v", err)
 	}
-	
+
+	err = sqlite_db.LiveHardDieFast()
+
+	if err != nil {
+		log.Fatalf("Failed to enable live hard, die fast settings, %v", err)
+	}
+
 	id_table, err := tables.NewIdentifiersTableWithDatabase(ctx, sqlite_db)
 
 	if err != nil {
@@ -49,14 +55,14 @@ func main() {
 	}
 
 	//
-	
+
 	data_sources := make(map[string]io.Reader)
 
 	data_paths := map[string]string{
 		"lcsh":  lcsh.DATA_JSON,
 		"lcnaf": lcnaf.DATA_JSON,
 	}
-	
+
 	for source, path := range data_paths {
 
 		r, err := data.FS.Open(path)
@@ -81,7 +87,7 @@ func main() {
 
 		log.Printf("Finished indexing %s\n", data_paths[source])
 	}
-	
+
 }
 
 func index(ctx context.Context, source string, db sqlite.Database, tables []sqlite.Table, r io.Reader) error {
@@ -113,9 +119,8 @@ func index(ctx context.Context, source string, db sqlite.Database, tables []sqli
 				return fmt.Errorf("Failed to index %v in table %s, %w", row, t.Name(), err)
 			}
 		}
-		
+
 	}
 
 	return nil
 }
-	
