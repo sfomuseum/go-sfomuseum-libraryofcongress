@@ -1,4 +1,15 @@
 github.com/aaronland/go-roster v0.0.2 h1:2Fu7v4VQLRLRL/Zgr6R9S5JxsW75Ab/K88QtMVX532s=
 github.com/aaronland/go-roster v0.0.2/go.mod h1:AcovpxlG1XxJxX2Fjqlm63fEIBhCjEIBV4lP87FZDmI=
+github.com/aaronland/go-sqlite v0.0.5 h1:ak6Ee2AyXIcE+8ZInib2qy4k2NSDIQeZKiL9bEZW6S4=
+github.com/aaronland/go-sqlite v0.0.5/go.mod h1:91mdgKDJ1RXxvXH6RYvBhi2gqCX7TnRCCZThx1ZQx5M=
+github.com/google/go-cmp v0.5.6/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
+github.com/mattn/go-sqlite3 v1.14.8 h1:gDp86IdQsN/xWjIEmr9MF6o9mpksUgh0fu+9ByFxzIU=
+github.com/mattn/go-sqlite3 v1.14.8/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
+github.com/psanford/sqlite3vfs v0.0.0-20210815004946-a82d70c653ce/go.mod h1:iW4cSew5PAb1sMZiTEkVJAIBNrepaB6jTYjeP47WtI0=
+github.com/psanford/sqlite3vfs v0.0.0-20210823054414-6197b9fad12f h1:QiyAANPBaECR1F2ejYGIn7zxvLrLPk7bDp2Q9Ha6f34=
+github.com/psanford/sqlite3vfs v0.0.0-20210823054414-6197b9fad12f/go.mod h1:iW4cSew5PAb1sMZiTEkVJAIBNrepaB6jTYjeP47WtI0=
+github.com/psanford/sqlite3vfshttp v0.0.0-20210815150654-07be1ade312e h1:KH9aXyBtKhgoc3XM7nBS82sN1MLUiw+XJsLBvirBVpU=
+github.com/psanford/sqlite3vfshttp v0.0.0-20210815150654-07be1ade312e/go.mod h1:fgwmd0q/GmamdQOyXby4SM/m6mBk6aTde7uJ5sxkeUA=
 github.com/sfomuseum/go-csvdict v0.0.1 h1:Cj8/qXXBJBxCjgorHW5QdRWEGCZpXc+qpdKH9CTRLGU=
 github.com/sfomuseum/go-csvdict v0.0.1/go.mod h1:KGO283kbQh+sqZq84XIj7qr0ImaGY2NX3hedUmAo/sI=
+golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
