@@ -1,18 +1,18 @@
 package lcsh
 
 import (
+	"compress/bzip2"
 	"context"
 	"fmt"
+	"github.com/sfomuseum/go-csvdict"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/data"
-	"github.com/sfomuseum/go-csvdict"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
 	"sync"
 	"sync/atomic"
-	"compress/bzip2"
 )
 
 var lookup_table *sync.Map
@@ -60,7 +60,7 @@ func NewSubjectHeadingLookup(ctx context.Context, uri string) (libraryofcongress
 		if err != nil {
 			return nil, fmt.Errorf("Failed to load remote data from Github, %w", err)
 		}
-		
+
 		lookup_func := NewSubjectHeadingLookupFuncWithReader(ctx, rsp.Body)
 		return NewSubjectHeadingLookupWithLookupFunc(ctx, lookup_func)
 
@@ -72,7 +72,7 @@ func NewSubjectHeadingLookup(ctx context.Context, uri string) (libraryofcongress
 		if err != nil {
 			return nil, fmt.Errorf("Failed to load local precompiled data, %w", err)
 		}
-		
+
 		lookup_func := NewSubjectHeadingLookupFuncWithReader(ctx, fh)
 		return NewSubjectHeadingLookupWithLookupFunc(ctx, lookup_func)
 	}
@@ -86,7 +86,7 @@ func NewSubjectHeadingLookupFuncWithReader(ctx context.Context, r io.ReadCloser)
 	defer r.Close()
 
 	fh := bzip2.NewReader(r)
-	
+
 	csv_r, err := csvdict.NewReader(fh)
 
 	if err != nil {
@@ -102,29 +102,28 @@ func NewSubjectHeadingLookupFuncWithReader(ctx context.Context, r io.ReadCloser)
 
 		table := new(sync.Map)
 
-
 		for {
 
 			select {
-			case <- ctx.Done():
+			case <-ctx.Done():
 				return
 			default:
 				// pass
 			}
-			
+
 			row, err := csv_r.Read()
-			
+
 			if err == io.EOF {
 				break
 			}
-			
+
 			if err != nil {
 				lookup_init_err = err
 				return
 			}
 
 			sh := &SubjectHeading{
-				Id: row["id"],
+				Id:    row["id"],
 				Label: row["label"],
 			}
 
@@ -133,9 +132,9 @@ func NewSubjectHeadingLookupFuncWithReader(ctx context.Context, r io.ReadCloser)
 			if err != nil {
 				lookup_init_err = err
 				return
-			}			
+			}
 		}
-		
+
 		lookup_table = table
 	}
 
