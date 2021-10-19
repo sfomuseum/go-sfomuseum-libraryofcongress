@@ -3,21 +3,20 @@
 package main
 
 import (
-	"bytes"
 	"compress/bzip2"
 	"context"
-	"encoding/json"
 	"flag"
-	"fmt"
 	"github.com/cenkalti/backoff/v4"
 	es "github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esutil"
-	"github.com/sfomuseum/go-csvdict"
+	loc_database "github.com/sfomuseum/go-libraryofcongress-database"
+	loc_elasticsearch "github.com/sfomuseum/go-libraryofcongress-database/elasticsearch"
+	loc_timings "github.com/sfomuseum/go-libraryofcongress-database/timings"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/data"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/lcnaf"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/lcsh"
-	"io"
 	"log"
+	"os"
 	"time"
 )
 
@@ -76,7 +75,7 @@ func main() {
 
 	//
 
-	data_sources := make(map[string]io.Reader)
+	data_sources := make([]*loc_database.Source, 0)
 
 	data_paths := map[string]string{
 		"lcsh":  lcsh.DATA_JSON,
@@ -91,21 +90,28 @@ func main() {
 			log.Fatalf("Failed to open %s, %v", path, err)
 		}
 
-		defer r.Close()
-		data_sources[source] = bzip2.NewReader(r)
-	}
-
-	//
-
-	for source, r := range data_sources {
-
-		err := index(ctx, bi, source, r)
-
-		if err != nil {
-			log.Fatalf("Failed to index %s, %v", source, err)
+		src := &loc_database.Source{
+			Label:  source,
+			Reader: bzip2.NewReader(r),
 		}
 
-		log.Printf("Finished indexing %s\n", data_paths[source])
+		data_sources = append(data_sources, src)
+	}
+
+	d := time.Second * 60
+	monitor, err := loc_timings.NewMonitor(ctx, d)
+
+	if err != nil {
+		log.Fatalf("Failed to create timings monitor, %v", err)
+	}
+
+	monitor.Start(ctx, os.Stdout)
+	defer monitor.Stop(ctx)
+
+	err = loc_elasticsearch.Index(ctx, data_sources, bi, monitor)
+
+	if err != nil {
+		log.Fatalf("Failed to index sources, %v", err)
 	}
 
 	err = bi.Close(ctx)
@@ -114,69 +120,4 @@ func main() {
 		log.Fatalf("Failed to close indexer, %v", err)
 	}
 
-}
-
-func index(ctx context.Context, bi esutil.BulkIndexer, source string, r io.Reader) error {
-
-	csv_r, err := csvdict.NewReader(r)
-
-	if err != nil {
-		return fmt.Errorf("Failed to create CSV reader for %s, %w", source, err)
-	}
-
-	for {
-		row, err := csv_r.Read()
-
-		if err == io.EOF {
-			break
-		}
-
-		if err != nil {
-			return err
-		}
-
-		doc := map[string]string{
-			"id":     row["id"],
-			"label":  row["label"],
-			"source": source,
-		}
-
-		doc_id := row["id"]
-
-		enc_doc, err := json.Marshal(doc)
-
-		if err != nil {
-			return fmt.Errorf("Failed to marshal %s, %v", doc_id, err)
-		}
-
-		// log.Println(string(enc_doc))
-		// continue
-
-		bulk_item := esutil.BulkIndexerItem{
-			Action:     "index",
-			DocumentID: doc_id,
-			Body:       bytes.NewReader(enc_doc),
-
-			OnSuccess: func(ctx context.Context, item esutil.BulkIndexerItem, res esutil.BulkIndexerResponseItem) {
-				// log.Printf("Indexed %s\n", path)
-			},
-
-			OnFailure: func(ctx context.Context, item esutil.BulkIndexerItem, res esutil.BulkIndexerResponseItem, err error) {
-				if err != nil {
-					log.Printf("ERROR: Failed to index %s, %s", doc_id, err)
-				} else {
-					log.Printf("ERROR: Failed to index %s, %s: %s", doc_id, res.Error.Type, res.Error.Reason)
-				}
-			},
-		}
-
-		err = bi.Add(ctx, bulk_item)
-
-		if err != nil {
-			log.Printf("Failed to schedule %s, %v", doc_id, err)
-			continue
-		}
-	}
-
-	return nil
 }

@@ -5,16 +5,18 @@ import (
 	"context"
 	_ "database/sql"
 	"flag"
-	"fmt"
 	"github.com/aaronland/go-sqlite"
 	"github.com/aaronland/go-sqlite/database"
-	"github.com/sfomuseum/go-csvdict"
+	loc_database "github.com/sfomuseum/go-libraryofcongress-database"
+	loc_sqlite "github.com/sfomuseum/go-libraryofcongress-database/sqlite"
+	loc_tables "github.com/sfomuseum/go-libraryofcongress-database/sqlite/tables"
+	loc_timings "github.com/sfomuseum/go-libraryofcongress-database/timings"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/data"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/lcnaf"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/lcsh"
-	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/sqlite/tables"
-	"io"
 	"log"
+	"os"
+	"time"
 )
 
 func main() {
@@ -37,26 +39,19 @@ func main() {
 		log.Fatalf("Failed to enable live hard, die fast settings, %v", err)
 	}
 
-	id_table, err := tables.NewIdentifiersTableWithDatabase(ctx, sqlite_db)
-
-	if err != nil {
-		log.Fatalf("Failed to create identifiers table, %v", err)
-	}
-
-	search_table, err := tables.NewSearchTableWithDatabase(ctx, sqlite_db)
+	search_table, err := loc_tables.NewSearchTableWithDatabase(ctx, sqlite_db)
 
 	if err != nil {
 		log.Fatalf("Failed to create search table, %v", err)
 	}
 
 	tables := []sqlite.Table{
-		id_table,
 		search_table,
 	}
 
 	//
 
-	data_sources := make(map[string]io.Reader)
+	data_sources := make([]*loc_database.Source, 0)
 
 	data_paths := map[string]string{
 		"lcsh":  lcsh.DATA_JSON,
@@ -71,56 +66,28 @@ func main() {
 			log.Fatalf("Failed to open %s, %v", path, err)
 		}
 
-		defer r.Close()
-		data_sources[source] = bzip2.NewReader(r)
-	}
-
-	//
-
-	for source, r := range data_sources {
-
-		err := index(ctx, source, sqlite_db, tables, r)
-
-		if err != nil {
-			log.Fatalf("Failed to index %s, %v", source, err)
+		src := &loc_database.Source{
+			Label:  source,
+			Reader: bzip2.NewReader(r),
 		}
 
-		log.Printf("Finished indexing %s\n", data_paths[source])
+		data_sources = append(data_sources, src)
 	}
 
-}
-
-func index(ctx context.Context, source string, db sqlite.Database, tables []sqlite.Table, r io.Reader) error {
-
-	csv_r, err := csvdict.NewReader(r)
+	d := time.Second * 60
+	monitor, err := loc_timings.NewMonitor(ctx, d)
 
 	if err != nil {
-		return fmt.Errorf("Failed to create CSV reader for %s, %w", source, err)
+		log.Fatalf("Failed to create timings monitor, %v", err)
 	}
 
-	for {
-		row, err := csv_r.Read()
+	monitor.Start(ctx, os.Stdout)
+	defer monitor.Stop(ctx)
 
-		if err == io.EOF {
-			break
-		}
+	err = loc_sqlite.Index(ctx, data_sources, sqlite_db, tables, monitor)
 
-		if err != nil {
-			return err
-		}
-
-		row["source"] = source
-
-		for _, t := range tables {
-
-			err := t.IndexRecord(ctx, db, row)
-
-			if err != nil {
-				return fmt.Errorf("Failed to index %v in table %s, %w", row, t.Name(), err)
-			}
-		}
-
+	if err != nil {
+		log.Fatalf("Failed to index sources, %v", err)
 	}
 
-	return nil
 }
