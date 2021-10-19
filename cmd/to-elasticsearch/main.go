@@ -11,7 +11,7 @@ import (
 	"github.com/elastic/go-elasticsearch/v7/esutil"
 	loc_database "github.com/sfomuseum/go-libraryofcongress-database"
 	loc_elasticsearch "github.com/sfomuseum/go-libraryofcongress-database/elasticsearch"
-	loc_timings "github.com/sfomuseum/go-libraryofcongress-database/timings"
+	"github.com/sfomuseum/go-timings"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/data"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/lcnaf"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/lcsh"
@@ -99,7 +99,7 @@ func main() {
 	}
 
 	d := time.Second * 60
-	monitor, err := loc_timings.NewMonitor(ctx, d)
+	monitor, err := timings.NewCounterMonitor(ctx, d)
 
 	if err != nil {
 		log.Fatalf("Failed to create timings monitor, %v", err)

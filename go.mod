@@ -11,5 +11,6 @@ require (
 	github.com/cenkalti/backoff/v4 v4.1.1
 	github.com/elastic/go-elasticsearch/v7 v7.13.1
 	github.com/sfomuseum/go-csvdict v0.0.1
-	github.com/sfomuseum/go-libraryofcongress-database v0.0.1
+	github.com/sfomuseum/go-libraryofcongress-database v0.0.2
+	github.com/sfomuseum/go-timings v0.0.1
 )

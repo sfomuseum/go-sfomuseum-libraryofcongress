@@ -38,6 +38,10 @@ github.com/sfomuseum/go-csvdict v0.0.1/go.mod h1:KGO283kbQh+sqZq84XIj7qr0ImaGY2N
 github.com/sfomuseum/go-flags v0.8.2/go.mod h1:ML3DTNbF9xnjExSdS/9FtVLjIUhRU5gm/ehzISv+t2w=
 github.com/sfomuseum/go-libraryofcongress-database v0.0.1 h1:nZUPtUGoWxG4DqaVgtxay6XgGYj8l6PlPHPinh9QsWA=
 github.com/sfomuseum/go-libraryofcongress-database v0.0.1/go.mod h1:EI6EcpBrR85F0iV2wf907xQZzvV8bpKvh2feB2r6BV0=
+github.com/sfomuseum/go-libraryofcongress-database v0.0.2 h1:sF4xfSVcrRj+wx5Uw2VkUgAHCAuBpFSVrzXEe0A9dEI=
+github.com/sfomuseum/go-libraryofcongress-database v0.0.2/go.mod h1:k+9gsgvFQ/zAjGdwb+GGLlzAhO0Ka22d8vtk7KmJJgo=
+github.com/sfomuseum/go-timings v0.0.1 h1:DZ5RrdzLHCho5iuYUZyV2In18LxQrzd+sHHvbxhl8J4=
+github.com/sfomuseum/go-timings v0.0.1/go.mod h1:5J83BoWlLLoCh2j4mrhKx2Oz7f4kePbQLuYAKII3BFQ=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/whosonfirst/algnhsa v0.1.0/go.mod h1:swLBXxaVTv3s6dJLhekdQCuCTshUew+xHjptRC21RG0=
