@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress"
+	_ "gocloud.dev/blob/fileblob"
+	"net/url"
 	"path/filepath"
 	"testing"
 	"time"
@@ -22,6 +24,8 @@ func TestLCNAFLookup(t *testing.T) {
 		"lcnaf://github",
 	}
 
+	// START OF build local file URI
+
 	rel_path := "../data/lcnaf.csv.bz2"
 	abs_path, err := filepath.Abs(rel_path)
 
@@ -31,6 +35,24 @@ func TestLCNAFLookup(t *testing.T) {
 
 	file_uri := fmt.Sprintf("lcnaf://%s", abs_path)
 	schemes = append(schemes, file_uri)
+
+	// END OF build local file URI
+
+	// START OF build blob URI
+
+	root := filepath.Dir(abs_path)
+	fname := filepath.Base(abs_path)
+
+	fileblob_uri := fmt.Sprintf("file://%s", root)
+
+	v := &url.Values{}
+	v.Set("uri", fileblob_uri)
+
+	blob_uri := fmt.Sprintf("lcnaf://blob/%s?%s", fname, v.Encode())
+
+	schemes = append(schemes, blob_uri)
+
+	// END OF build blob URI
 
 	for _, s := range schemes {
 

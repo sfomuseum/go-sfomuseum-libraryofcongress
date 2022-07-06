@@ -7,6 +7,7 @@ import (
 	"github.com/sfomuseum/go-csvdict"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/data"
+	"gocloud.dev/blob"
 	"io"
 	"net/http"
 	"net/url"
@@ -54,17 +55,6 @@ func NewSubjectHeadingLookup(ctx context.Context, uri string) (libraryofcongress
 
 	switch source {
 
-	case "github":
-
-		rsp, err := http.Get(DATA_GITHUB)
-
-		if err != nil {
-			return nil, fmt.Errorf("Failed to load remote data from Github, %w", err)
-		}
-
-		lookup_func := NewSubjectHeadingLookupFuncWithReader(ctx, rsp.Body)
-		return NewSubjectHeadingLookupWithLookupFunc(ctx, lookup_func)
-
 	case "":
 
 		fs := data.FS
@@ -74,7 +64,46 @@ func NewSubjectHeadingLookup(ctx context.Context, uri string) (libraryofcongress
 			return nil, fmt.Errorf("Failed to load local precompiled data, %w", err)
 		}
 
+		defer fh.Close()
+
 		lookup_func := NewSubjectHeadingLookupFuncWithReader(ctx, fh)
+		return NewSubjectHeadingLookupWithLookupFunc(ctx, lookup_func)
+
+	case "blob":
+
+		path := u.Path
+		q := u.Query()
+
+		bucket_uri := q.Get("uri")
+
+		bucket, err := blob.OpenBucket(ctx, bucket_uri)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to open bucket (%s), %w", bucket_uri, err)
+		}
+
+		defer bucket.Close()
+
+		r, err := bucket.NewReader(ctx, path, nil)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to create new reader for %s, %w", path, err)
+		}
+
+		defer r.Close()
+
+		lookup_func := NewSubjectHeadingLookupFuncWithReader(ctx, r)
+		return NewSubjectHeadingLookupWithLookupFunc(ctx, lookup_func)
+
+	case "github":
+
+		rsp, err := http.Get(DATA_GITHUB)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to load remote data from Github, %w", err)
+		}
+
+		lookup_func := NewSubjectHeadingLookupFuncWithReader(ctx, rsp.Body)
 		return NewSubjectHeadingLookupWithLookupFunc(ctx, lookup_func)
 
 	default:

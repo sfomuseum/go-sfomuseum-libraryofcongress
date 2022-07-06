@@ -13,5 +13,6 @@ require (
 	github.com/sfomuseum/go-csvdict v1.0.0
 	github.com/sfomuseum/go-libraryofcongress-database v0.0.2
 	github.com/sfomuseum/go-timings v0.0.1
+	gocloud.dev v0.25.0
 
 )
