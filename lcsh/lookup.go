@@ -55,20 +55,6 @@ func NewSubjectHeadingLookup(ctx context.Context, uri string) (libraryofcongress
 
 	switch source {
 
-	case "":
-
-		fs := data.FS
-		fh, err := fs.Open(DATA_JSON)
-
-		if err != nil {
-			return nil, fmt.Errorf("Failed to load local precompiled data, %w", err)
-		}
-
-		defer fh.Close()
-
-		lookup_func := NewSubjectHeadingLookupFuncWithReader(ctx, fh)
-		return NewSubjectHeadingLookupWithLookupFunc(ctx, lookup_func)
-
 	case "blob":
 
 		path := u.Path
@@ -106,7 +92,7 @@ func NewSubjectHeadingLookup(ctx context.Context, uri string) (libraryofcongress
 		lookup_func := NewSubjectHeadingLookupFuncWithReader(ctx, rsp.Body)
 		return NewSubjectHeadingLookupWithLookupFunc(ctx, lookup_func)
 
-	default:
+	case "file":
 
 		path := u.Path
 		r, err := os.Open(path)
@@ -115,7 +101,23 @@ func NewSubjectHeadingLookup(ctx context.Context, uri string) (libraryofcongress
 			return nil, fmt.Errorf("Failed to load data from path (%s), %w", path, err)
 		}
 
+		defer r.Close()
+
 		lookup_func := NewSubjectHeadingLookupFuncWithReader(ctx, r)
+		return NewSubjectHeadingLookupWithLookupFunc(ctx, lookup_func)
+
+	default:
+
+		fs := data.FS
+		fh, err := fs.Open(DATA_JSON)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to load local precompiled data, %w", err)
+		}
+
+		defer fh.Close()
+
+		lookup_func := NewSubjectHeadingLookupFuncWithReader(ctx, fh)
 		return NewSubjectHeadingLookupWithLookupFunc(ctx, lookup_func)
 	}
 }
@@ -125,8 +127,6 @@ func NewSubjectHeadingLookup(ctx context.Context, uri string) (libraryofcongress
 // It is assumed that the data in `r` will be formatted in the same way as the procompiled (embedded) data stored in `data/sfomuseum.json`.
 func NewSubjectHeadingLookupFuncWithReader(ctx context.Context, r io.ReadCloser) SubjectHeadingLookupFunc {
 
-	defer r.Close()
-
 	fh := bzip2.NewReader(r)
 
 	csv_r, err := csvdict.NewReader(fh)
@@ -134,7 +134,7 @@ func NewSubjectHeadingLookupFuncWithReader(ctx context.Context, r io.ReadCloser)
 	if err != nil {
 
 		lookup_func := func(ctx context.Context) {
-			lookup_init_err = err
+			lookup_init_err = fmt.Errorf("Failed to create CSV reader, %w", err)
 		}
 
 		return lookup_func
@@ -160,7 +160,7 @@ func NewSubjectHeadingLookupFuncWithReader(ctx context.Context, r io.ReadCloser)
 			}
 
 			if err != nil {
-				lookup_init_err = err
+				lookup_init_err = fmt.Errorf("Failed to read row, %w", err)
 				return
 			}
 
@@ -172,7 +172,7 @@ func NewSubjectHeadingLookupFuncWithReader(ctx context.Context, r io.ReadCloser)
 			err = appendData(ctx, table, sh)
 
 			if err != nil {
-				lookup_init_err = err
+				lookup_init_err = fmt.Errorf("Failed to append row (%s), %w", sh, err)
 				return
 			}
 		}

@@ -33,7 +33,7 @@ func TestLCSHLookup(t *testing.T) {
 		t.Fatalf("Failed to derive absolute path for %s, %v", rel_path, err)
 	}
 
-	file_uri := fmt.Sprintf("lcsh://%s", abs_path)
+	file_uri := fmt.Sprintf("lcsh://file%s", abs_path)
 	schemes = append(schemes, file_uri)
 
 	// START OF build blob URI

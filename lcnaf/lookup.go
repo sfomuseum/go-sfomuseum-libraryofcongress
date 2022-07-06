@@ -1,6 +1,8 @@
 package lcnaf
 
 import (
+	_ "bufio"
+	_ "bytes"
 	"compress/bzip2"
 	"context"
 	"fmt"
@@ -55,18 +57,6 @@ func NewNamedAuthorityLookup(ctx context.Context, uri string) (libraryofcongress
 
 	switch source {
 
-	case "":
-
-		fs := data.FS
-		r, err := fs.Open(DATA_JSON)
-
-		if err != nil {
-			return nil, fmt.Errorf("Failed to load local precompiled data, %w", err)
-		}
-
-		lookup_func := NewNamedAuthorityLookupFuncWithReader(ctx, r)
-		return NewNamedAuthorityLookupWithLookupFunc(ctx, lookup_func)
-
 	case "blob":
 
 		path := u.Path
@@ -104,13 +94,28 @@ func NewNamedAuthorityLookup(ctx context.Context, uri string) (libraryofcongress
 		lookup_func := NewNamedAuthorityLookupFuncWithReader(ctx, rsp.Body)
 		return NewNamedAuthorityLookupWithLookupFunc(ctx, lookup_func)
 
-	default:
+	case "file":
 
 		path := u.Path
+
 		r, err := os.Open(path)
 
 		if err != nil {
 			return nil, fmt.Errorf("Failed to load data from path (%s), %w", path, err)
+		}
+
+		defer r.Close()
+
+		lookup_func := NewNamedAuthorityLookupFuncWithReader(ctx, r)
+		return NewNamedAuthorityLookupWithLookupFunc(ctx, lookup_func)
+
+	default:
+
+		fs := data.FS
+		r, err := fs.Open(DATA_JSON)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to load local precompiled data, %w", err)
 		}
 
 		defer r.Close()
@@ -124,8 +129,6 @@ func NewNamedAuthorityLookup(ctx context.Context, uri string) (libraryofcongress
 // `r` will be closed when the `NamedAuthorityLookupFunc` function instance is invoked.
 // It is assumed that the data in `r` will be formatted in the same way as the procompiled (embedded) data stored in `data/sfomuseum.json`.
 func NewNamedAuthorityLookupFuncWithReader(ctx context.Context, r io.ReadCloser) NamedAuthorityLookupFunc {
-
-	defer r.Close()
 
 	fh := bzip2.NewReader(r)
 
