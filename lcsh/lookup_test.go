@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress"
+	"path/filepath"
 	"testing"
 	"time"
 )
@@ -20,7 +21,18 @@ func TestLCSHLookup(t *testing.T) {
 
 	schemes := []string{
 		"lcsh://",
+		"lcsh://github",
 	}
+
+	rel_path := "../data/lcsh.csv.bz2"
+	abs_path, err := filepath.Abs(rel_path)
+
+	if err != nil {
+		t.Fatalf("Failed to derive absolute path for %s, %v", rel_path, err)
+	}
+
+	file_uri := fmt.Sprintf("lcsh://%s", abs_path)
+	schemes = append(schemes, file_uri)
 
 	for _, s := range schemes {
 
@@ -28,7 +40,7 @@ func TestLCSHLookup(t *testing.T) {
 
 		lu, err := libraryofcongress.NewLookup(ctx, s)
 
-		fmt.Printf("Time to load lookup %v\n", time.Since(t1))
+		fmt.Printf("Time to load lookup '%s' %v\n", s, time.Since(t1))
 
 		if err != nil {
 			t.Fatalf("Failed to create lookup using scheme '%s', %v", s, err)

@@ -10,6 +10,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -64,7 +65,7 @@ func NewSubjectHeadingLookup(ctx context.Context, uri string) (libraryofcongress
 		lookup_func := NewSubjectHeadingLookupFuncWithReader(ctx, rsp.Body)
 		return NewSubjectHeadingLookupWithLookupFunc(ctx, lookup_func)
 
-	default:
+	case "":
 
 		fs := data.FS
 		fh, err := fs.Open(DATA_JSON)
@@ -74,6 +75,18 @@ func NewSubjectHeadingLookup(ctx context.Context, uri string) (libraryofcongress
 		}
 
 		lookup_func := NewSubjectHeadingLookupFuncWithReader(ctx, fh)
+		return NewSubjectHeadingLookupWithLookupFunc(ctx, lookup_func)
+
+	default:
+
+		path := u.Path
+		r, err := os.Open(path)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to load data from path (%s), %w", path, err)
+		}
+
+		lookup_func := NewSubjectHeadingLookupFuncWithReader(ctx, r)
 		return NewSubjectHeadingLookupWithLookupFunc(ctx, lookup_func)
 	}
 }
