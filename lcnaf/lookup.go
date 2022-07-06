@@ -8,9 +8,9 @@ import (
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/data"
 	"io"
-	"os"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -65,25 +65,25 @@ func NewNamedAuthorityLookup(ctx context.Context, uri string) (libraryofcongress
 		lookup_func := NewNamedAuthorityLookupFuncWithReader(ctx, rsp.Body)
 		return NewNamedAuthorityLookupWithLookupFunc(ctx, lookup_func)
 
-	case "file":
-
-		path := u.Path
-		r, err := os.Open(path)
-
-		if err != nil {
-			return nil, fmt.Errorf("Failed to load data from path (%s), %w", path, err)
-		}
-
-		lookup_func := NewNamedAuthorityLookupFuncWithReader(ctx, r)
-		return NewNamedAuthorityLookupWithLookupFunc(ctx, lookup_func)
-		
-	default:
+	case "":
 
 		fs := data.FS
 		r, err := fs.Open(DATA_JSON)
 
 		if err != nil {
 			return nil, fmt.Errorf("Failed to load local precompiled data, %w", err)
+		}
+
+		lookup_func := NewNamedAuthorityLookupFuncWithReader(ctx, r)
+		return NewNamedAuthorityLookupWithLookupFunc(ctx, lookup_func)
+
+	default:
+
+		path := u.Path
+		r, err := os.Open(path)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to load data from path (%s), %w", path, err)
 		}
 
 		lookup_func := NewNamedAuthorityLookupFuncWithReader(ctx, r)
