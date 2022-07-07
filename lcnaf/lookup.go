@@ -110,19 +110,19 @@ func NewNamedAuthorityLookup(ctx context.Context, uri string) (libraryofcongress
 		return NewNamedAuthorityLookupWithLookupFunc(ctx, lookup_func)
 
 	/*
-	case "sqlite":
+		case "sqlite":
 
-		path := u.Path
+			path := u.Path
 
-		db, err := sql.Open("sqlite3", path)
+			db, err := sql.Open("sqlite3", path)
 
-		if err != nil {
-			return nil, fmt.Errorf("Failed to open database %s, %w", path, err)
-		}
-		
-		return NewNamedAuthorityLookupWithDB(ctx, db)
+			if err != nil {
+				return nil, fmt.Errorf("Failed to open database %s, %w", path, err)
+			}
+
+			return NewNamedAuthorityLookupWithDB(ctx, db)
 	*/
-		
+
 	default:
 
 		fs := data.FS
