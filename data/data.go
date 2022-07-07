@@ -1,3 +1,4 @@
+// Package data provides embedded Library of Congress (LoC) data files.
 package data
 
 import (

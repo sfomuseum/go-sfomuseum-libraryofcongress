@@ -4,7 +4,11 @@ Go package for working with Library of Congress data in an SFO Museum context.
 
 ## Documentation
 
-Documentation is incomplete at this time. For working example code have a look at:
+[![Go Reference](https://pkg.go.dev/badge/github.com/sfomuseum/go-sfomuseum-libraryofcongress.svg)](https://pkg.go.dev/github.com/sfomuseum/go-sfomuseum-libraryofcongress)
+
+## Example
+
+For working example code have a look at:
 
 * [cmd/lookup/main.go](cmd/lookup/main.go)
 * [lcsh/lookup_test.go](lcsh/lookup_test.go)
@@ -39,3 +43,4 @@ Remember: This package is tailored to SFO Museum's specific needs, and it's spec
 ## See also
 
 * https://github.com/sfomuseum/go-libraryofcongress
+* https://github.com/sfomuseum/go-libraryofcongress-database
