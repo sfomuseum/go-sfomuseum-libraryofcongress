@@ -7,9 +7,11 @@ import (
 	"flag"
 	"github.com/aaronland/go-sqlite"
 	"github.com/aaronland/go-sqlite/database"
+	// START OF this is a bit of a hot mess right now
 	loc_database "github.com/sfomuseum/go-libraryofcongress-database"
 	loc_sqlite "github.com/sfomuseum/go-libraryofcongress-database/sqlite"
-	loc_tables "github.com/sfomuseum/go-libraryofcongress-database/sqlite/tables"
+	loc_tables "github.com/sfomuseum/go-sfomuseum-libraryofcongress/sqlite/tables"
+	// END OF this is a bit of a hot mess right now
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/data"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/lcnaf"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/lcsh"
@@ -21,9 +23,18 @@ import (
 
 func main() {
 
-	dsn := flag.String("dsn", "libraryofcongress.db", "")
+	index_identifiers := flag.Bool("identifiers", true, "Index the identifiers tables.")
+	index_search := flag.Bool("search", false, "Index the search table.")
+	index_all := flag.Bool("all", false, "Index all tables.")
+
+	dsn := flag.String("dsn", "libraryofcongress.db", "The output path for the new SQLite database.")
 
 	flag.Parse()
+
+	if *index_all {
+		*index_identifiers = true
+		*index_search = true
+	}
 
 	ctx := context.Background()
 
@@ -39,14 +50,28 @@ func main() {
 		log.Fatalf("Failed to enable live hard, die fast settings, %v", err)
 	}
 
-	search_table, err := loc_tables.NewSearchTableWithDatabase(ctx, sqlite_db)
+	tables := make([]sqlite.Table, 0)
 
-	if err != nil {
-		log.Fatalf("Failed to create search table, %v", err)
+	if *index_identifiers {
+
+		identifiers_table, err := loc_tables.NewIdentifiersTableWithDatabase(ctx, sqlite_db)
+
+		if err != nil {
+			log.Fatalf("Failed to create identifiers table, %v", err)
+		}
+
+		tables = append(tables, identifiers_table)
 	}
 
-	tables := []sqlite.Table{
-		search_table,
+	if *index_search {
+
+		search_table, err := loc_tables.NewSearchTableWithDatabase(ctx, sqlite_db)
+
+		if err != nil {
+			log.Fatalf("Failed to create search table, %v", err)
+		}
+
+		tables = append(tables, search_table)
 	}
 
 	//
