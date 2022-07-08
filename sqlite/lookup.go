@@ -37,6 +37,11 @@ func NewSQLiteLookup(ctx context.Context, uri string) (libraryofcongress.Lookup,
 		return nil, fmt.Errorf("Failed to create database, %w", err)
 	}
 
+	return NewSQLiteLookupWithDatabase(ctx, db)
+}
+
+func NewSQLiteLookupWithDatabase(ctx context.Context, db *database.SQLiteDatabase) (libraryofcongress.Lookup, error) {
+	
 	exists, err := sqlite.HasTable(ctx, db, "identifiers")
 
 	if err != nil {
