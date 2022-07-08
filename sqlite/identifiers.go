@@ -93,7 +93,7 @@ func NewIndentifiersDatabase(ctx context.Context, dsn string) (*database.SQLiteD
 // NewIdentifiersLookup() returns a new `libraryofcongress.Lookup` for a `aaronland/go-sqlite/database.SQLiteDatabase` instance
 // (identified) by 'dsn' which is produced using the `NewIdentifiersDatabase()` method. This is primarily a helper method used by the
 // `flysfo:go-sfomuseum-data-filemaker/cmd/merge-filemaker-objects-export` tool.
-func NewIdentifersLookup(ctx context.Context, dsn string) (libraryofcongress.Lookup, error) {
+func NewIdentifiersLookup(ctx context.Context, dsn string) (libraryofcongress.Lookup, error) {
 
 	sqlite_db, err := NewIndentifiersDatabase(ctx, dsn)
 
