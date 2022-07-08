@@ -7,18 +7,15 @@ import (
 	"flag"
 	"github.com/aaronland/go-sqlite"
 	"github.com/aaronland/go-sqlite/database"
-	// START OF this is a bit of a hot mess right now
 	loc_database "github.com/sfomuseum/go-libraryofcongress-database"
 	loc_sqlite "github.com/sfomuseum/go-libraryofcongress-database/sqlite"
-	loc_tables "github.com/sfomuseum/go-sfomuseum-libraryofcongress/sqlite/tables"
-	// END OF this is a bit of a hot mess right now
+	loc_tables "github.com/sfomuseum/go-libraryofcongress-database/sqlite/tables"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/data"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/lcnaf"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/lcsh"
 	"github.com/sfomuseum/go-timings"
 	"log"
 	"os"
-	"time"
 )
 
 func main() {
@@ -99,8 +96,7 @@ func main() {
 		data_sources = append(data_sources, src)
 	}
 
-	d := time.Second * 60
-	monitor, err := timings.NewCounterMonitor(ctx, d)
+	monitor, err := timings.NewCounterMonitor(ctx, "counter://PT60S")
 
 	if err != nil {
 		log.Fatalf("Failed to create timings monitor, %v", err)

@@ -5,13 +5,15 @@ import (
 	"fmt"
 	"github.com/aaronland/go-pagination"
 	"github.com/aaronland/go-roster"
+	"github.com/sfomuseum/go-timings"
 	"net/url"
 	"sort"
 	"strings"
 )
 
 type LibraryOfCongressDatabase interface {
-	Query(context.Context, string, pagination.PaginationOptions) ([]*QueryResult, pagination.Pagination, error)
+	Index(context.Context, []*Source, timings.Monitor) error
+	Query(context.Context, string, pagination.Options) ([]*QueryResult, pagination.Results, error)
 }
 
 type LibraryOfCongressInitializeFunc func(ctx context.Context, uri string) (LibraryOfCongressDatabase, error)
