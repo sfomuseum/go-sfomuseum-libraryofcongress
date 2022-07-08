@@ -473,8 +473,8 @@ github.com/satori/go.uuid v1.2.0/go.mod h1:dA0hQrYB0VpLJoorglMZABFdXlWrHn1NEOzdh
 github.com/sfomuseum/go-csvdict v1.0.0 h1:ECLdgya7eXmJ8oJpk8JKmiUmQhahgXehHPWIC+bTUc0=
 github.com/sfomuseum/go-csvdict v1.0.0/go.mod h1:cXhcPaOj1q//WQpkcH1HEXeAdNd0N/P+EniPVNfnBxs=
 github.com/sfomuseum/go-flags v0.8.2/go.mod h1:ML3DTNbF9xnjExSdS/9FtVLjIUhRU5gm/ehzISv+t2w=
-github.com/sfomuseum/go-libraryofcongress-database v0.0.3 h1:RP5bcH6RcZNZp1l8I8Qv3Y8+BBv4NRfqmVfUOOu2Qhs=
-github.com/sfomuseum/go-libraryofcongress-database v0.0.3/go.mod h1:v84k0O+Un+JFM9sYgvEZBVrfkU18aI42o+4E9HRE5WI=
+github.com/sfomuseum/go-libraryofcongress-database v0.0.4 h1:F09Tu5ktYuuKuM6vQPSzj1/M96HFLzyDBJf3jVs6u6A=
+github.com/sfomuseum/go-libraryofcongress-database v0.0.4/go.mod h1:v84k0O+Un+JFM9sYgvEZBVrfkU18aI42o+4E9HRE5WI=
 github.com/sfomuseum/go-timings v1.0.0 h1:ddfGVOcX2tQVjBa9ja2D8CQHc6tlWQRjeh/NlS0zfFM=
 github.com/sfomuseum/go-timings v1.0.0/go.mod h1:957+kDYXCQ7y+4KO/c0yQByq39On8raH2iOyrVKlYkY=
 github.com/sfomuseum/iso8601duration v1.0.0 h1:nzLvzy9l/SxvXRBoReDi+9Hsqvpzncecqq0Te+W4Yjo=
