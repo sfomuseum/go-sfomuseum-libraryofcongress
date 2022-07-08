@@ -11,10 +11,10 @@ import (
 	loc_sqlite "github.com/sfomuseum/go-libraryofcongress-database/sqlite"
 	loc_tables "github.com/sfomuseum/go-libraryofcongress-database/sqlite/tables"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress"
-	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/data"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/lcnaf"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/lcsh"
 	"github.com/sfomuseum/go-timings"
+	"io"
 	"os"
 )
 
@@ -22,7 +22,7 @@ import (
 // table (sfomuseum/go-libraryofcongress-database/sqlite/tables) which has been indexed using the LCSH and LCNAF
 // data bundled with `sfomuseum/go-sfomuseum-libraryofcongress`. This is primarily a helper method used by the
 // `flysfo:go-sfomuseum-data-filemaker/cmd/merge-filemaker-objects-export` tool.
-func NewIndentifiersDatabase(ctx context.Context, dsn string) (*database.SQLiteDatabase, error) {
+func NewIndentifiersDatabase(ctx context.Context, dsn string, data_uris map[string]string) (*database.SQLiteDatabase, error) {
 
 	// Some or all of this code should be reconciled with cmd/to-sqlite but not today...
 	// (20220708/thisisaaronland)
@@ -51,17 +51,33 @@ func NewIndentifiersDatabase(ctx context.Context, dsn string) (*database.SQLiteD
 
 	data_sources := make([]*loc_database.Source, 0)
 
-	data_paths := map[string]string{
-		"lcsh":  lcsh.DATA_JSON,
-		"lcnaf": lcnaf.DATA_JSON,
-	}
+	for source, uri := range data_uris {
 
-	for source, path := range data_paths {
+		var r io.ReadCloser
 
-		r, err := data.FS.Open(path)
+		switch source {
+		case "lcsh":
 
-		if err != nil {
-			return nil, fmt.Errorf("Failed to open %s, %v", path, err)
+			fh, err := lcsh.OpenData(ctx, uri)
+
+			if err != nil {
+				return nil, fmt.Errorf("Failed to open %s, %v", uri, err)
+			}
+
+			r = fh
+
+		case "lcnaf":
+
+			fh, err := lcnaf.OpenData(ctx, uri)
+
+			if err != nil {
+				return nil, fmt.Errorf("Failed to open %s, %v", uri, err)
+			}
+
+			r = fh
+
+		default:
+			return nil, fmt.Errorf("Unsupported source: %s", source)
 		}
 
 		src := &loc_database.Source{
@@ -93,9 +109,9 @@ func NewIndentifiersDatabase(ctx context.Context, dsn string) (*database.SQLiteD
 // NewIdentifiersLookup() returns a new `libraryofcongress.Lookup` for a `aaronland/go-sqlite/database.SQLiteDatabase` instance
 // (identified) by 'dsn' which is produced using the `NewIdentifiersDatabase()` method. This is primarily a helper method used by the
 // `flysfo:go-sfomuseum-data-filemaker/cmd/merge-filemaker-objects-export` tool.
-func NewIdentifiersLookup(ctx context.Context, dsn string) (libraryofcongress.Lookup, error) {
+func NewIdentifiersLookup(ctx context.Context, dsn string, data_uris map[string]string) (libraryofcongress.Lookup, error) {
 
-	sqlite_db, err := NewIndentifiersDatabase(ctx, dsn)
+	sqlite_db, err := NewIndentifiersDatabase(ctx, dsn, data_uris)
 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create new database, %v", err)

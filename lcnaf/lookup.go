@@ -8,12 +8,7 @@ import (
 	"fmt"
 	"github.com/sfomuseum/go-csvdict"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress"
-	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/data"
-	"gocloud.dev/blob"
 	"io"
-	"net/http"
-	"net/url"
-	"os"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -40,103 +35,16 @@ func init() {
 
 func NewNamedAuthorityLookup(ctx context.Context, uri string) (libraryofcongress.Lookup, error) {
 
-	u, err := url.Parse(uri)
+	r, err := OpenData(ctx, uri)
 
 	if err != nil {
-		return nil, fmt.Errorf("Failed to parse URI, %w", err)
+		return nil, fmt.Errorf("Failed to open data for '%s', %w", uri, err)
 	}
 
-	var source string
+	defer r.Close()
 
-	switch u.Host {
-	case "sfomuseum":
-		source = u.Path
-	default:
-		source = u.Host
-	}
-
-	switch source {
-
-	case "blob":
-
-		path := u.Path
-		q := u.Query()
-
-		bucket_uri := q.Get("uri")
-
-		bucket, err := blob.OpenBucket(ctx, bucket_uri)
-
-		if err != nil {
-			return nil, fmt.Errorf("Failed to open bucket (%s), %w", bucket_uri, err)
-		}
-
-		defer bucket.Close()
-
-		r, err := bucket.NewReader(ctx, path, nil)
-
-		if err != nil {
-			return nil, fmt.Errorf("Failed to create new reader for %s, %w", path, err)
-		}
-
-		defer r.Close()
-
-		lookup_func := NewNamedAuthorityLookupFuncWithReader(ctx, r)
-		return NewNamedAuthorityLookupWithLookupFunc(ctx, lookup_func)
-
-	case "github":
-
-		rsp, err := http.Get(DATA_GITHUB)
-
-		if err != nil {
-			return nil, fmt.Errorf("Failed to load remote data from Github, %w", err)
-		}
-
-		lookup_func := NewNamedAuthorityLookupFuncWithReader(ctx, rsp.Body)
-		return NewNamedAuthorityLookupWithLookupFunc(ctx, lookup_func)
-
-	case "file":
-
-		path := u.Path
-
-		r, err := os.Open(path)
-
-		if err != nil {
-			return nil, fmt.Errorf("Failed to load data from path (%s), %w", path, err)
-		}
-
-		defer r.Close()
-
-		lookup_func := NewNamedAuthorityLookupFuncWithReader(ctx, r)
-		return NewNamedAuthorityLookupWithLookupFunc(ctx, lookup_func)
-
-	/*
-		case "sqlite":
-
-			path := u.Path
-
-			db, err := sql.Open("sqlite3", path)
-
-			if err != nil {
-				return nil, fmt.Errorf("Failed to open database %s, %w", path, err)
-			}
-
-			return NewNamedAuthorityLookupWithDB(ctx, db)
-	*/
-
-	default:
-
-		fs := data.FS
-		r, err := fs.Open(DATA_JSON)
-
-		if err != nil {
-			return nil, fmt.Errorf("Failed to load local precompiled data, %w", err)
-		}
-
-		defer r.Close()
-
-		lookup_func := NewNamedAuthorityLookupFuncWithReader(ctx, r)
-		return NewNamedAuthorityLookupWithLookupFunc(ctx, lookup_func)
-	}
+	lookup_func := NewNamedAuthorityLookupFuncWithReader(ctx, r)
+	return NewNamedAuthorityLookupWithLookupFunc(ctx, lookup_func)
 }
 
 // NewNamedAuthorityLookup will return an `NamedAuthorityLookupFunc` function instance that, when invoked, will populate an `airports.NamedAuthoritysLookup` instance with data stored in `r`.
