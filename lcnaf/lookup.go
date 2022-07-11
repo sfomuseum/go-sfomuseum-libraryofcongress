@@ -133,7 +133,7 @@ func (l *NamedAuthorityLookup) Find(ctx context.Context, code string) ([]interfa
 		return nil, NotFound{code}
 	}
 
-	airport := make([]interface{}, 0)
+	name_authorities := make([]interface{}, 0)
 
 	for _, p := range pointers.([]string) {
 
@@ -147,10 +147,10 @@ func (l *NamedAuthorityLookup) Find(ctx context.Context, code string) ([]interfa
 			return nil, fmt.Errorf("Invalid pointer, '%s'", p)
 		}
 
-		airport = append(airport, row.(*NamedAuthority))
+		name_authorities = append(name_authorities, row.(*NamedAuthority))
 	}
 
-	return airport, nil
+	return name_authorities, nil
 }
 
 func (l *NamedAuthorityLookup) Append(ctx context.Context, data interface{}) error {
@@ -181,7 +181,6 @@ func appendData(ctx context.Context, table *sync.Map, data *NamedAuthority) erro
 		others, ok := table.Load(code)
 
 		if ok {
-
 			pointers = others.([]string)
 		}
 

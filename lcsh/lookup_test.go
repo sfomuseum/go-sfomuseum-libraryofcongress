@@ -13,10 +13,11 @@ import (
 
 func TestLCSHLookup(t *testing.T) {
 
-	lcsh_tests := map[string]string{
-		"Airplanes":                         "sh85002782",
-		"Boeing airplanes":                  "sh85015277",
-		"Aerial photography in archaeology": "sh85001256",
+	lcsh_tests := map[string][]string{
+		"Airplanes":                         []string{"sh85002782"},
+		"Boeing airplanes":                  []string{"sh85015277"},
+		"Aerial photography in archaeology": []string{"sh85001256"},
+		"Cooking":                           []string{"sh2010007517", "sh2010008400"},
 	}
 
 	ctx := context.Background()
@@ -64,7 +65,7 @@ func TestLCSHLookup(t *testing.T) {
 			t.Fatalf("Failed to create lookup using scheme '%s', %v", s, err)
 		}
 
-		for label, lcsh_id := range lcsh_tests {
+		for label, lcsh_ids := range lcsh_tests {
 
 			results, err := lu.Find(ctx, label)
 
@@ -72,14 +73,17 @@ func TestLCSHLookup(t *testing.T) {
 				t.Fatalf("Unable to find '%s' using scheme '%s', %v", label, s, err)
 			}
 
-			if len(results) != 1 {
-				t.Fatalf("Invalid results for '%s' using scheme '%s'", s, label)
+			if len(results) != len(lcsh_ids) {
+				t.Fatalf("Invalid result count for '%s' using scheme '%s'", s, label)
 			}
 
-			a := results[0].(*SubjectHeading)
+			for idx, r := range results {
 
-			if a.Id != lcsh_id {
-				t.Fatalf("Invalid match for '%s' using scheme '%s', expected '%s' but got '%s'", label, s, lcsh_id, a.Id)
+				a := r.(*SubjectHeading)
+
+				if a.Id != lcsh_ids[idx] {
+					t.Fatalf("Invalid match for '%s' using scheme '%s', expected '%s' but got '%s'", label, s, lcsh_ids[idx], a.Id)
+				}
 			}
 		}
 	}

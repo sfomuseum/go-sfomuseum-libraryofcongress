@@ -45,7 +45,7 @@ func NewSubjectHeadingLookup(ctx context.Context, uri string) (libraryofcongress
 	return NewSubjectHeadingLookupWithLookupFunc(ctx, lookup_func)
 }
 
-// NewSubjectHeadingLookup will return an `SubjectHeadingLookupFunc` function instance that, when invoked, will populate an `airports.SubjectHeadingsLookup` instance with data stored in `r`.
+// NewSubjectHeadingLookup will return an `SubjectHeadingLookupFunc` function instance that, when invoked, will populate an `lcsh.SubjectHeadingsLookup` instance with data stored in `r`.
 // `r` will be closed when the `SubjectHeadingLookupFunc` function instance is invoked.
 // It is assumed that the data in `r` will be formatted in the same way as the procompiled (embedded) data stored in `data/sfomuseum.json`.
 func NewSubjectHeadingLookupFuncWithReader(ctx context.Context, r io.ReadCloser) SubjectHeadingLookupFunc {
@@ -106,7 +106,7 @@ func NewSubjectHeadingLookupFuncWithReader(ctx context.Context, r io.ReadCloser)
 	return lookup_func
 }
 
-// NewSubjectHeadingLookupWithLookupFunc will return an `airports.SubjectHeadingsLookup` instance derived by data compiled using `lookup_func`.
+// NewSubjectHeadingLookupWithLookupFunc will return an `lcsh.SubjectHeadingsLookup` instance derived by data compiled using `lookup_func`.
 func NewSubjectHeadingLookupWithLookupFunc(ctx context.Context, lookup_func SubjectHeadingLookupFunc) (libraryofcongress.Lookup, error) {
 
 	fn := func() {
@@ -131,7 +131,7 @@ func (l *SubjectHeadingLookup) Find(ctx context.Context, code string) ([]interfa
 		return nil, NotFound{code}
 	}
 
-	airport := make([]interface{}, 0)
+	subject_headers := make([]interface{}, 0)
 
 	for _, p := range pointers.([]string) {
 
@@ -145,10 +145,10 @@ func (l *SubjectHeadingLookup) Find(ctx context.Context, code string) ([]interfa
 			return nil, fmt.Errorf("Invalid pointer, '%s'", p)
 		}
 
-		airport = append(airport, row.(*SubjectHeading))
+		subject_headers = append(subject_headers, row.(*SubjectHeading))
 	}
 
-	return airport, nil
+	return subject_headers, nil
 }
 
 func (l *SubjectHeadingLookup) Append(ctx context.Context, data interface{}) error {
@@ -179,7 +179,6 @@ func appendData(ctx context.Context, table *sync.Map, data *SubjectHeading) erro
 		others, ok := table.Load(code)
 
 		if ok {
-
 			pointers = others.([]string)
 		}
 
