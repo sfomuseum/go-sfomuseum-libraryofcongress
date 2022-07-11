@@ -18,6 +18,8 @@ func TestLCSHLookup(t *testing.T) {
 		"Boeing airplanes":                  []string{"sh85015277"},
 		"Aerial photography in archaeology": []string{"sh85001256"},
 		"Cooking":                           []string{"sh2010007517", "sh2010008400"},
+		"Aeronautics -- Popular works":      []string{"sh2007100714"}, // SFOM syntax
+		"Aeronautics--Popular works":        []string{"sh2007100714"}, // LoC syntax
 	}
 
 	ctx := context.Background()

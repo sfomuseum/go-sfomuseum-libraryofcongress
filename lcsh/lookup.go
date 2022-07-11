@@ -128,6 +128,16 @@ func (l *SubjectHeadingLookup) Find(ctx context.Context, code string) ([]interfa
 	pointers, ok := lookup_table.Load(code)
 
 	if !ok {
+
+		// START OF hack to account for the difference in syntax between SFOM and LoC
+
+		if strings.Contains(code, " -- ") {
+			code = strings.Replace(code, " -- ", "--", -1)
+			return l.Find(ctx, code)
+		}
+
+		// END OF hack to account for the difference in syntax between SFOM and LoC
+
 		return nil, NotFound{code}
 	}
 
