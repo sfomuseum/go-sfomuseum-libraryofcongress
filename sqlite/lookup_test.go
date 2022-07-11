@@ -29,17 +29,20 @@ func TestSQLiteLookup(t *testing.T) {
 		t.Fatalf("Failed to create new lookup, %v", err)
 	}
 
-	lcsh_tests := map[string]string{
-		"Grave Creek Watershed (Josephine County, Or.)": "sh00000019",
-		"Grave Creek (Josephine County, Or.)":           "sh00000021",
+	lcsh_tests := map[string][]string{
+		"Grave Creek Watershed (Josephine County, Or.)": []string{"sh00000019"},
+		"Grave Creek (Josephine County, Or.)":           []string{"sh00000021"},
+		"Cooking":                                       []string{"sh2010007517", "sh2010008400"},
+		"Aeronautics -- Popular works":                  []string{"sh2007100714"}, // SFOM syntax
+		"Aeronautics--Popular works":                    []string{"sh2007100714"}, // LoC syntax
 	}
 
-	lcnaf_tests := map[string]string{
-		"Neefe, Christian Gottlob, 1748-1798. Veränderungen über den Priestermarsch aus Mozarts Zauberflöte": "no2018099999",
-		"Halstenberg, Friedrich": "n2003099999",
+	lcnaf_tests := map[string][]string{
+		"Neefe, Christian Gottlob, 1748-1798. Veränderungen über den Priestermarsch aus Mozarts Zauberflöte": []string{"no2018099999"},
+		"Halstenberg, Friedrich": []string{"n2003099999"},
 	}
 
-	for label, expected_id := range lcsh_tests {
+	for label, expected_ids := range lcsh_tests {
 
 		rsp, err := l.Find(ctx, label)
 
@@ -47,18 +50,20 @@ func TestSQLiteLookup(t *testing.T) {
 			t.Fatalf("Failed to find '%s', %v", label, err)
 		}
 
-		if len(rsp) == 0 {
+		if len(rsp) != len(expected_ids) {
 			t.Fatalf("No results for '%s'", label)
 		}
 
-		first := rsp[0].(*lcsh.SubjectHeading)
+		for idx, r := range rsp {
+			sh := r.(*lcsh.SubjectHeading)
 
-		if first.Id != expected_id {
-			t.Fatalf("Unexpected ID for '%s': %s", label, first.Id)
+			if sh.Id != expected_ids[idx] {
+				t.Fatalf("Unexpected ID for '%s': %s", label, sh.Id)
+			}
 		}
 	}
 
-	for label, expected_id := range lcnaf_tests {
+	for label, expected_ids := range lcnaf_tests {
 
 		rsp, err := l.Find(ctx, label)
 
@@ -66,14 +71,17 @@ func TestSQLiteLookup(t *testing.T) {
 			t.Fatalf("Failed to find '%s', %v", label, err)
 		}
 
-		if len(rsp) == 0 {
+		if len(rsp) != len(expected_ids) {
 			t.Fatalf("No results for '%s'", label)
 		}
 
-		first := rsp[0].(*lcnaf.NamedAuthority)
+		for idx, r := range rsp {
 
-		if first.Id != expected_id {
-			t.Fatalf("Unexpected ID for '%s': %s", label, first.Id)
+			na := r.(*lcnaf.NamedAuthority)
+
+			if na.Id != expected_ids[idx] {
+				t.Fatalf("Unexpected ID for '%s': %s", label, na.Id)
+			}
 		}
 	}
 

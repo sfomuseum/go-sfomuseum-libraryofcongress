@@ -9,6 +9,7 @@ import (
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/lcnaf"
 	"github.com/sfomuseum/go-sfomuseum-libraryofcongress/lcsh"
 	"net/url"
+	"strings"
 )
 
 type SQLiteLookup struct {
@@ -125,6 +126,18 @@ func (l *SQLiteLookup) Find(ctx context.Context, code string) ([]interface{}, er
 
 	if err != nil {
 		return nil, fmt.Errorf("Database reported an error, %w", err)
+	}
+
+	if len(rsp) == 0 {
+
+		// START OF hack to account for the difference in syntax between SFOM and LoC
+
+		if strings.Contains(code, " -- ") {
+			code = strings.Replace(code, " -- ", "--", -1)
+			return l.Find(ctx, code)
+		}
+
+		// END OF hack to account for the difference in syntax between SFOM and LoC
 	}
 
 	return rsp, nil
